@@ -19,6 +19,7 @@ import java.net.URL;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.nio.file.FileSystemAlreadyExistsException;
 import java.nio.file.FileSystems;
 import java.nio.file.FileSystem;
 import java.nio.file.Paths;
@@ -280,7 +281,12 @@ public class CommandLineArgs {
       URI uri = url.toURI();
       Path cnfPath = null;
       if ("jar".equals(uri.getScheme()) || "resource".equals(uri.getScheme())) {
-        FileSystem fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap(), null);
+        FileSystem fileSystem;
+        try {
+          fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap(), null);
+        } catch (FileSystemAlreadyExistsException e) {
+          fileSystem = FileSystems.getFileSystem(uri);
+        }
         cnfPath = fileSystem.getPath(benchFolder);
       } else {
         cnfPath = Paths.get(uri);
